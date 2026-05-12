@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 import requests
 import json
 import time
@@ -22,6 +23,7 @@ MAX_TOKENS = 1200
 TEMPERATURE = 0.6
 TOP_P = 0.9
 REPETITION_PENALTY = 1.1
+SEED = -1  # -1 = auto (random)
 SAMPLE_RATE = 24000  # SNAC model uses 24kHz
 
 # Available voices based on the Orpheus-TTS repository
@@ -48,12 +50,16 @@ def format_prompt(prompt, voice=DEFAULT_VOICE):
     
     return f"{special_start}{formatted_prompt}{special_end}"
 
-def generate_tokens_from_api(prompt, voice=DEFAULT_VOICE, temperature=TEMPERATURE, 
-                            top_p=TOP_P, max_tokens=MAX_TOKENS, repetition_penalty=REPETITION_PENALTY):
+def generate_tokens_from_api(prompt, voice=DEFAULT_VOICE, temperature=TEMPERATURE,
+                            top_p=TOP_P, max_tokens=MAX_TOKENS, repetition_penalty=REPETITION_PENALTY,
+                            seed=SEED):
     """Generate tokens from text using LM Studio API."""
     formatted_prompt = format_prompt(prompt, voice)
     print(f"Generating speech for: {formatted_prompt}")
-    
+    if seed == -1:
+        seed = random.randint(0, 2**32 - 1)
+    print(f"Seed: {seed}")
+
     # Create the request payload for the LM Studio API
     payload = {
         "model": "orpheus-3b-0.1-ft-q4_k_m",  # Model name can be anything, LM Studio ignores it
@@ -62,6 +68,7 @@ def generate_tokens_from_api(prompt, voice=DEFAULT_VOICE, temperature=TEMPERATUR
         "temperature": temperature,
         "top_p": top_p,
         "repeat_penalty": repetition_penalty,
+        "seed": seed,
         "stream": True
     }
     
@@ -216,17 +223,19 @@ def stream_audio(audio_buffer):
     sd.play(audio_float, SAMPLE_RATE)
     sd.wait()
 
-def generate_speech_from_api(prompt, voice=DEFAULT_VOICE, output_file=None, temperature=TEMPERATURE, 
-                     top_p=TOP_P, max_tokens=MAX_TOKENS, repetition_penalty=REPETITION_PENALTY):
+def generate_speech_from_api(prompt, voice=DEFAULT_VOICE, output_file=None, temperature=TEMPERATURE,
+                     top_p=TOP_P, max_tokens=MAX_TOKENS, repetition_penalty=REPETITION_PENALTY,
+                     seed=SEED):
     """Generate speech from text using Orpheus model via LM Studio API."""
     return tokens_decoder_sync(
         generate_tokens_from_api(
-            prompt=prompt, 
+            prompt=prompt,
             voice=voice,
             temperature=temperature,
             top_p=top_p,
             max_tokens=max_tokens,
-            repetition_penalty=repetition_penalty
+            repetition_penalty=repetition_penalty,
+            seed=seed
         ),
         output_file=output_file
     )
@@ -251,8 +260,10 @@ def main():
     parser.add_argument("--list-voices", action="store_true", help="List available voices")
     parser.add_argument("--temperature", type=float, default=TEMPERATURE, help="Temperature for generation")
     parser.add_argument("--top_p", type=float, default=TOP_P, help="Top-p sampling parameter")
-    parser.add_argument("--repetition_penalty", type=float, default=REPETITION_PENALTY, 
+    parser.add_argument("--repetition_penalty", type=float, default=REPETITION_PENALTY,
                        help="Repetition penalty (>=1.1 required for stable generation)")
+    parser.add_argument("--seed", type=int, default=SEED,
+                       help="Random seed for reproducible generation (-1 = random, default: -1)")
     
     args = parser.parse_args()
     
@@ -288,6 +299,7 @@ def main():
         temperature=args.temperature,
         top_p=args.top_p,
         repetition_penalty=args.repetition_penalty,
+        seed=args.seed,
         output_file=output_file
     )
     end_time = time.time()

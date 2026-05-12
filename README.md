@@ -57,6 +57,17 @@ python gguf_orpheus.py --text "Your text here" --voice tara --output "output.wav
 - `--temperature`: Temperature for generation (default: 0.6)
 - `--top_p`: Top-p sampling parameter (default: 0.9)
 - `--repetition_penalty`: Repetition penalty (default: 1.1)
+- `--seed`: Random seed for reproducible generation (default: -1 = random)
+
+Each run prints the seed used, even when auto-generated. Pass that value back with `--seed` to reproduce the same output:
+
+```
+python gguf_orpheus.py --text "Hello world" --voice tara
+# Seed: 2847362910
+
+python gguf_orpheus.py --text "Hello world" --voice tara --seed 2847362910
+# Reproduces the same audio
+```
 
 ## Available Voices
 
