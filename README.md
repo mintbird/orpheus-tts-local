@@ -11,18 +11,34 @@ A lightweight client for running [Orpheus TTS](https://huggingface.co/canopylabs
 
 ## Quick Setup
 
-1. Install [LM Studio](https://lmstudio.ai/) 
+1. Install [LM Studio](https://lmstudio.ai/)
 2. Download the [Orpheus TTS model (orpheus-3b-0.1-ft-q4_k_m.gguf)](https://huggingface.co/isaiahbjork/orpheus-3b-0.1-ft-Q4_K_M-GGUF) in LM Studio
 3. Load the Orpheus model in LM Studio
 4. Start the local server in LM Studio (default: http://127.0.0.1:1234)
 5. Install dependencies:
-   ```
+
+   **Linux/macOS:**
+   ```bash
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-6. Run the script:
+
+   **Windows (Command Prompt):**
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
+   pip install -r requirements.txt
    ```
+6. Run the script:
+
+   **Linux/macOS:**
+   ```bash
+   python gguf_orpheus.py --text "Hello, this is a test" --voice tara
+   ```
+
+   **Windows (Command Prompt):**
+   ```cmd
    python gguf_orpheus.py --text "Hello, this is a test" --voice tara
    ```
 
@@ -70,4 +86,3 @@ You can add emotion to the speech by adding the following tags:
 ## License
 
 Apache 2.0
-
